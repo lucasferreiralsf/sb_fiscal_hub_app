@@ -1,13 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sb_fiscal_hub_app/models/user_model.dart';
 import 'package:sb_fiscal_hub_app/screens/login_screen.dart';
 import 'package:sb_fiscal_hub_app/tiles/drawer_tile.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:string_mask/string_mask.dart';
+
+enum MenuButton { sair, trocarEmpresa }
 
 class CustomDrawer extends StatelessWidget {
   final PageController pageController;
+  final Map<String, dynamic> _currentCompany;
 
-  CustomDrawer(this.pageController);
+  CustomDrawer(this.pageController, this._currentCompany);
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +26,7 @@ class CustomDrawer extends StatelessWidget {
                 end: Alignment.bottomRight),
           ),
         );
+
     return Drawer(
       child: Stack(
         children: <Widget>[
@@ -37,10 +45,19 @@ class CustomDrawer extends StatelessWidget {
                       Positioned(
                         top: 8.0,
                         left: 0.0,
-                        child: Text(
-                          "Fiscal Hub",
-                          style: TextStyle(
-                              fontSize: 34.0, fontWeight: FontWeight.bold),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              "Fiscal Hub",
+                              style: TextStyle(
+                                  fontSize: 34.0, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              "${StringMask('00.000.000/0000-00').apply(_currentCompany['cnpj'])} \n ${_currentCompany['razaoSocial']}",
+                              style: TextStyle(fontSize: 14.0),
+                            ),
+                          ],
                         ),
                       ),
                       Positioned(
@@ -53,22 +70,35 @@ class CustomDrawer extends StatelessWidget {
                         ),
                       ),
                       Positioned(
-                        bottom: 0.0,
-                        right: 10.0,
-                        child: GestureDetector(
-                          onTap: () {
-                            model.loggout();
-                            Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //     builder: (context) => LoginScreen()));
+                        top: 4.0,
+                        right: -10.0,
+                        child: PopupMenuButton<MenuButton>(
+                          onSelected: (MenuButton result) {
+                            switch (result) {
+                              case MenuButton.sair:
+                                model.loggout();
+                                Navigator.of(context).pushNamedAndRemoveUntil(
+                                    '/', (Route<dynamic> route) => false);
+                                break;
+                              case MenuButton.trocarEmpresa:
+                                model.changeCompany();
+                                Navigator.of(context)
+                                    .pushReplacementNamed('/select-company');
+                                break;
+                            }
                           },
-                          child: Text(
-                            "Sair",
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor),
-                          ),
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<MenuButton>>[
+                            const PopupMenuItem<MenuButton>(
+                              value: MenuButton.sair,
+                              child: Text('Sair'),
+                            ),
+                            const PopupMenuItem<MenuButton>(
+                              value: MenuButton.trocarEmpresa,
+                              child: Text('Trocar empresa'),
+                            ),
+                          ],
+                          icon: Icon(Icons.more_vert),
                         ),
                       ),
                     ],
@@ -85,3 +115,39 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 }
+
+// Column(
+//                           children: <Widget>[
+//                             GestureDetector(
+//                               onTap: () {
+//                                 model.loggout();
+//                                 Navigator.of(context).pushNamedAndRemoveUntil(
+//                                     '/', (Route<dynamic> route) => false);
+//                                 // Navigator.of(context).push(MaterialPageRoute(
+//                                 //     builder: (context) => LoginScreen()));
+//                               },
+//                               child: Text(
+//                                 "Sair",
+//                                 style: TextStyle(
+//                                     fontSize: 18.0,
+//                                     fontWeight: FontWeight.bold,
+//                                     color: Theme.of(context).primaryColor),
+//                               ),
+//                             ),
+//                             GestureDetector(
+//                               onTap: () {
+//                                 model.changeCompany();
+//                                 Navigator.of(context).pushReplacementNamed('select-company');
+//                                 // Navigator.of(context).push(MaterialPageRoute(
+//                                 //     builder: (context) => LoginScreen()));
+//                               },
+//                               child: Text(
+//                                 "Trocar empresa",
+//                                 style: TextStyle(
+//                                     fontSize: 18.0,
+//                                     fontWeight: FontWeight.bold,
+//                                     color: Theme.of(context).primaryColor),
+//                               ),
+//                             ),
+//                           ],
+//                         ),

@@ -59,6 +59,10 @@ class UserModel extends Model {
     FlutterSecureStorage().deleteAll();
   }
 
+  void changeCompany() async {
+    await FlutterSecureStorage().delete(key: 'currentCompany');
+  }
+
   bool isLoggedIn() {
     var userAuthData;
     getAuthData().then((result) => {userAuthData = result});
