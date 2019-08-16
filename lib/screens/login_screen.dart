@@ -11,11 +11,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _grupoController = TextEditingController(text: 'grupo1');
-  final _emailController = TextEditingController(text: 'master@subway.com');
-  final _passController = TextEditingController(
-      text:
-      'DAzdnI0ErdbDXEJE0p2cK9LUU2uQG6Ua1uQ5qlLS+IFtu83jneGWsdwRiyxIjW/Nf2WQBvg8sZqGqhiqxT7f6Q==');
+  final _grupoController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
