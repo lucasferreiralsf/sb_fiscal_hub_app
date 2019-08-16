@@ -58,8 +58,9 @@ class CustomDrawer extends StatelessWidget {
                         child: GestureDetector(
                           onTap: () {
                             model.loggout();
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => LoginScreen()));
+                            Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+                            // Navigator.of(context).push(MaterialPageRoute(
+                            //     builder: (context) => LoginScreen()));
                           },
                           child: Text(
                             "Sair",

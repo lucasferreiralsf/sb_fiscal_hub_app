@@ -37,8 +37,9 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
 
   void _setCompany(Map<String, dynamic> company) async {
     await FlutterSecureStorage().write(key: 'currentCompany', value: json.encode(company));
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => HomeScreen()));
+    Navigator.of(context).pushReplacementNamed('/home');
+    // Navigator.of(context).push(
+    //     MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sb_fiscal_hub_app/models/user_model.dart';
+import 'package:sb_fiscal_hub_app/screens/home_screen.dart';
 import 'package:sb_fiscal_hub_app/screens/login_screen.dart';
 import 'package:sb_fiscal_hub_app/screens/select_company_screen.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -34,11 +35,13 @@ class MyApp extends StatelessWidget {
           fontFamily: 'OpenSans',
         ),
         debugShowCheckedModeBanner: false,
-        home:
-            ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-
-          return LoginScreen();
-        }),
+        // home: LoginScreen(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => LoginScreen(),
+          '/home': (context) => HomeScreen(),
+          '/select-company': (context) => SelectCompanyScreen(),
+        },
       ),
     );
   }

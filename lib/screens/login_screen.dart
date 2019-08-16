@@ -235,8 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
 //      duration: Duration(seconds: 2),
 //    ));
 
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => SelectCompanyScreen()));
+    Navigator.pushNamed(context, '/select-company');
+    // Navigator.of(context).push(
+    //     MaterialPageRoute(builder: (context) => SelectCompanyScreen()));
 //    Future.delayed(Duration(seconds: 2)).then((_) {
 //      Builder(
 //          builder: (context) {
