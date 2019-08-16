@@ -27,30 +27,51 @@ class UserModel extends Model {
     isLoading = true;
     notifyListeners();
 
-    FlutterSecureStorage().write(key: 'userData', value: userData.toString());
+    await FlutterSecureStorage()
+        .write(key: 'userData', value: userData.toString());
 
-    http.post('https://sbwebapidev.azurewebsites.net/api/usuario/authenticate',
-        body: json.encode({
-          'enderecoEmail': userData['email'],
-          'senha': userData['password'],
-          'autNewOrigin': 'false'
-        }),
-        headers: {
+    final http.Response response = await http
+        .post('https://sbwebapidev.azurewebsites.net/api/usuario/authenticate',
+            body: json.encode({
+              'enderecoEmail': userData['email'],
+              'senha': userData['password'],
+              'autNewOrigin': 'false'
+            }),
+            headers: {
           'grupo': userData['grupo'],
           HttpHeaders.userAgentHeader: 'insomnia/6.6.2',
           HttpHeaders.contentTypeHeader: 'application/json',
-        }).then((result) {
-      FlutterSecureStorage().write(key: 'auth', value: result.body);
-
-      onSuccess();
-      isLoading = false;
-      notifyListeners();
-    }).catchError((e) {
-      signInError = e;
-      onFail();
-      isLoading = false;
-      notifyListeners();
+        }).catchError((e) {
+      _onError(e, onFail);
     });
+
+    if (response != null) {
+      switch (response.statusCode) {
+        case 200:
+          await FlutterSecureStorage().write(key: 'auth', value: response.body);
+
+          onSuccess();
+          isLoading = false;
+          notifyListeners();
+          break;
+        default:
+          signInError = {
+            'statusCode': response.statusCode,
+            'message': response.statusCode
+          };
+          onFail();
+          isLoading = false;
+          notifyListeners();
+          break;
+      }
+    }
+  }
+
+  _onError(e, onFail) {
+    signInError = e;
+    onFail();
+    isLoading = false;
+    notifyListeners();
   }
 
   void recoverPass() {}

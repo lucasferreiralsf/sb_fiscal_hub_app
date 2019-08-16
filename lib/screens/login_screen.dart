@@ -14,10 +14,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final _grupoController = TextEditingController();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
+  final FocusNode _grupoFocus = FocusNode();
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passFocus = FocusNode();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _login(model) {
+      Map<String, dynamic> userData = {
+        "grupo": _grupoController.text,
+        "email": _emailController.text,
+        "password": _passController.text,
+      };
+      model.loggout();
+      model.signIn(userData: userData, onSuccess: _onSuccess, onFail: _onFail);
+    }
+
+    void _onSuccess() {
+      Navigator.pushNamed(context, '/select-company');
+    }
+
+    void _onFail() {
+      // ScopedModelDescendant<UserModel>(builder: (context, child, model) {
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('Chave, email ou senha incorretos.'),
+          backgroundColor: Theme.of(context).errorColor,
+          duration: Duration(seconds: 4),
+        ));
+      //   return null;
+      // });
+    }
 
   @override
   Widget build(BuildContext context) {
+    _fieldFocusChange(
+        BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
+      currentFocus.unfocus();
+      FocusScope.of(context).requestFocus(nextFocus);
+    }    
+
     return Scaffold(
       key: _scaffoldKey,
       body: ScopedModelDescendant<UserModel>(
@@ -89,14 +123,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               hintText: "Grupo",
                               border: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               enabledBorder: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               filled: true,
                               fillColor: Color.fromARGB(20, 0, 0, 0),
                               prefixIcon: Icon(
@@ -104,6 +138,16 @@ class _LoginScreenState extends State<LoginScreen> {
 //                          color: Theme.of(context).hintColor,
                               ),
                             ),
+                            validator: (text) {
+                              if (text.isEmpty) return "Campo obrigatório.";
+                              return null;
+                            },
+                            textInputAction: TextInputAction.next,
+                            focusNode: _grupoFocus,
+                            onFieldSubmitted: (term) {
+                              _fieldFocusChange(
+                                  context, _grupoFocus, _emailFocus);
+                            },
                           ),
                           Padding(
                             padding: EdgeInsets.only(bottom: 10.0),
@@ -114,14 +158,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               hintText: "Email",
                               border: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               enabledBorder: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               filled: true,
                               fillColor: Color.fromARGB(20, 0, 0, 0),
                               prefixIcon: Icon(
@@ -135,6 +179,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (!text.contains('@')) return "Email inválido.";
                               return null;
                             },
+                            textInputAction: TextInputAction.next,
+                            focusNode: _emailFocus,
+                            onFieldSubmitted: (term) {
+                              _fieldFocusChange(
+                                  context, _emailFocus, _passFocus);
+                            },
                           ),
                           Padding(
                             padding: EdgeInsets.only(bottom: 10.0),
@@ -146,14 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               hintText: "Senha",
                               border: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               enabledBorder: OutlineInputBorder(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(50.0)),
+                                      BorderRadius.all(Radius.circular(50.0)),
                                   borderSide:
-                                  BorderSide(style: BorderStyle.none)),
+                                      BorderSide(style: BorderStyle.none)),
                               filled: true,
                               fillColor: Color.fromARGB(20, 0, 0, 0),
                               prefixIcon: Icon(
@@ -161,6 +211,16 @@ class _LoginScreenState extends State<LoginScreen> {
 //                          color: Theme.of(context).hintColor,
                               ),
                             ),
+                            validator: (text) {
+                              if (text.isEmpty) return "Campo obrigatório.";
+                              return null;
+                            },
+                            textInputAction: TextInputAction.next,
+                            focusNode: _passFocus,
+                            onFieldSubmitted: (term) {
+                              _passFocus.unfocus();
+                              _login(model);
+                            },
                           ),
                           Padding(
                             padding: EdgeInsets.only(bottom: 60.0),
@@ -195,16 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             onPressed: () {
                               if (_formKey.currentState.validate()) {
-                                Map<String, dynamic> userData = {
-                                  "grupo": _grupoController.text,
-                                  "email": _emailController.text,
-                                  "password": _passController.text,
-                                };
-                                model.loggout();
-                                model.signIn(
-                                    userData: userData,
-                                    onSuccess: _onSuccess,
-                                    onFail: _onFail);
+                                _login(model);
                               }
                             },
                           ),
@@ -222,39 +273,5 @@ class _LoginScreenState extends State<LoginScreen> {
         },
       ),
     );
-  }
-
-  void _onSuccess() {
-//    _scaffoldKey.currentState.showSnackBar(SnackBar(
-//      content: Text("Usuário logado com sucesso!"),
-//      backgroundColor: Theme
-//          .of(context)
-//          .primaryColor,
-//      duration: Duration(seconds: 2),
-//    ));
-
-    Navigator.pushNamed(context, '/select-company');
-    // Navigator.of(context).push(
-    //     MaterialPageRoute(builder: (context) => SelectCompanyScreen()));
-//    Future.delayed(Duration(seconds: 2)).then((_) {
-//      Builder(
-//          builder: (context) {
-
-//            return null;
-//          });
-//    });
-  }
-
-  void _onFail() {
-    ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text(model.signInError.toString()),
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
-        duration: Duration(seconds: 2),
-      ));
-      return null;
-    });
   }
 }
