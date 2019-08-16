@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sb_fiscal_hub_app/tabs/home_tab.dart';
+import 'package:sb_fiscal_hub_app/tabs/inventario_tab.dart';
+import 'package:sb_fiscal_hub_app/tabs/users_tab.dart';
 import 'package:sb_fiscal_hub_app/widgets/custom_drawer.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,10 +30,28 @@ class HomeScreen extends StatelessWidget {
                   children: <Widget>[
                     Scaffold(
                       appBar: AppBar(
-                        title: Text('Inventário'),
+                        title: Text('Home'),
                         centerTitle: true,
                       ),
                       body: HomeTab(),
+                      drawer: CustomDrawer(
+                          _pageController, json.decode(snapshot.data)),
+                    ),
+                    Scaffold(
+                      appBar: AppBar(
+                        title: Text('Usuários'),
+                        centerTitle: true,
+                      ),
+                      body: UsersTab(),
+                      drawer: CustomDrawer(
+                          _pageController, json.decode(snapshot.data)),
+                    ),
+                    Scaffold(
+                      appBar: AppBar(
+                        title: Text('Inventário'),
+                        centerTitle: true,
+                      ),
+                      body: InventarioTab(),
                       drawer: CustomDrawer(
                           _pageController, json.decode(snapshot.data)),
                     ),
