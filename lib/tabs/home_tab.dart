@@ -10,13 +10,16 @@ import 'package:sb_fiscal_hub_app/widgets/custom_list.dart';
 Future<Inventario> fetchInventario() async {
   final auth = json.decode(await FlutterSecureStorage().read(key: 'auth'));
   final currentCompany = json.decode(await FlutterSecureStorage().read(key: 'currentCompany'));
+  String _currentCompanyId = '${currentCompany["id"]}';
+  String _url = 'https://sbwebapidev.azurewebsites.net/api/inventario/GetByIdData/1/10/null/0/${currentCompany["id"]}';
+  String _token = 'Bearer ${auth["token"]}';
   final response = await http.get(
-      'https://sbwebapidev.azurewebsites.net/api/inventario/GetByIdData/1/10/null/0/${currentCompany['id']}',
+      Uri.encodeFull(_url),
       headers: {
         HttpHeaders.authorizationHeader:
-            'Bearer ${auth['token']}',
+        _token,
         HttpHeaders.userAgentHeader: 'insomnia/6.6.2',
-        'companyId': currentCompany['id'].toString(),
+        'companyId': _currentCompanyId,
       });
 
   if (response.statusCode == 200) {
