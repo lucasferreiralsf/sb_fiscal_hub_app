@@ -11,11 +11,12 @@ Future<Inventario> fetchInventario() async {
   final auth = json.decode(await FlutterSecureStorage().read(key: 'auth'));
   final currentCompany = json.decode(await FlutterSecureStorage().read(key: 'currentCompany'));
   final response = await http.get(
-      'https://sbwebapidev.azurewebsites.net/api/inventario/GetByIdData/1/10/${currentCompany['id']}/0/null',
+      'https://sbwebapidev.azurewebsites.net/api/inventario/GetByIdData/1/10/null/0/${currentCompany['id']}',
       headers: {
         HttpHeaders.authorizationHeader:
             'Bearer ${auth['token']}',
-        HttpHeaders.userAgentHeader: 'insomnia/6.6.2'
+        HttpHeaders.userAgentHeader: 'insomnia/6.6.2',
+        'companyId': currentCompany['id'].toString(),
       });
 
   if (response.statusCode == 200) {
