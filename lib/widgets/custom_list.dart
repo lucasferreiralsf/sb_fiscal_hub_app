@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sb_fiscal_hub_app/models/inventario_model.dart';
+import 'package:sb_fiscal_hub_app/utils/functions/fetched_data.dart';
 
-Widget CustomList(BuildContext context, AsyncSnapshot snapshot) {
+Widget CustomList(BuildContext context, FetchedData<Inventario> snapshot) {
   return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
       itemCount: snapshot.data.total,

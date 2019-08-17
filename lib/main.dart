@@ -4,7 +4,6 @@ import 'package:sb_fiscal_hub_app/models/user_model.dart';
 import 'package:sb_fiscal_hub_app/screens/home_screen.dart';
 import 'package:sb_fiscal_hub_app/screens/login_screen.dart';
 import 'package:sb_fiscal_hub_app/screens/select_company_screen.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,9 +11,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<UserModel>(
-      model: UserModel(),
-      child: MaterialApp(
+    return MaterialApp(
         localizationsDelegates: [
           // ... app-specific localization delegate[s] here
           GlobalMaterialLocalizations.delegate,
@@ -43,7 +40,6 @@ class MyApp extends StatelessWidget {
           '/home': (context) => HomeScreen(),
           '/select-company': (context) => SelectCompanyScreen(),
         },
-      ),
     );
   }
 }

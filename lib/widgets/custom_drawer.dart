@@ -1,11 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sb_fiscal_hub_app/models/user_model.dart';
-import 'package:sb_fiscal_hub_app/screens/login_screen.dart';
+import 'package:sb_fiscal_hub_app/repository/auth_repository.dart';
 import 'package:sb_fiscal_hub_app/tiles/drawer_tile.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:string_mask/string_mask.dart';
 
 enum MenuButton { sair, trocarEmpresa }
@@ -38,9 +33,7 @@ class CustomDrawer extends StatelessWidget {
                 margin: EdgeInsets.only(bottom: 8.0),
                 padding: EdgeInsets.fromLTRB(0.0, 16.0, 16.0, 8.0),
                 height: 170.0,
-                child: ScopedModelDescendant<UserModel>(
-                    builder: (context, child, model) {
-                  return Stack(
+                child: Stack(
                     children: <Widget>[
                       Positioned(
                         top: 8.0,
@@ -76,12 +69,12 @@ class CustomDrawer extends StatelessWidget {
                           onSelected: (MenuButton result) {
                             switch (result) {
                               case MenuButton.sair:
-                                model.loggout();
+                                loggout();
                                 Navigator.of(context).pushNamedAndRemoveUntil(
                                     '/', (Route<dynamic> route) => false);
                                 break;
                               case MenuButton.trocarEmpresa:
-                                model.changeCompany();
+                                changeCompany();
                                 Navigator.of(context)
                                     .pushReplacementNamed('/select-company');
                                 break;
@@ -102,8 +95,7 @@ class CustomDrawer extends StatelessWidget {
                         ),
                       ),
                     ],
-                  );
-                }),
+                  )
               ),
               Divider(),
               DrawerTile(Icons.home, 'Início', pageController, 0),
@@ -117,39 +109,3 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 }
-
-// Column(
-//                           children: <Widget>[
-//                             GestureDetector(
-//                               onTap: () {
-//                                 model.loggout();
-//                                 Navigator.of(context).pushNamedAndRemoveUntil(
-//                                     '/', (Route<dynamic> route) => false);
-//                                 // Navigator.of(context).push(MaterialPageRoute(
-//                                 //     builder: (context) => LoginScreen()));
-//                               },
-//                               child: Text(
-//                                 "Sair",
-//                                 style: TextStyle(
-//                                     fontSize: 18.0,
-//                                     fontWeight: FontWeight.bold,
-//                                     color: Theme.of(context).primaryColor),
-//                               ),
-//                             ),
-//                             GestureDetector(
-//                               onTap: () {
-//                                 model.changeCompany();
-//                                 Navigator.of(context).pushReplacementNamed('select-company');
-//                                 // Navigator.of(context).push(MaterialPageRoute(
-//                                 //     builder: (context) => LoginScreen()));
-//                               },
-//                               child: Text(
-//                                 "Trocar empresa",
-//                                 style: TextStyle(
-//                                     fontSize: 18.0,
-//                                     fontWeight: FontWeight.bold,
-//                                     color: Theme.of(context).primaryColor),
-//                               ),
-//                             ),
-//                           ],
-//                         ),

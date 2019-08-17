@@ -1,31 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sb_fiscal_hub_app/models/user_model.dart';
-import 'package:sb_fiscal_hub_app/screens/home_screen.dart';
+import 'package:sb_fiscal_hub_app/repository/auth_repository.dart';
+import 'package:sb_fiscal_hub_app/utils/functions/fetched_data.dart';
 import 'package:string_mask/string_mask.dart';
-import 'package:http/http.dart' as http;
-
-Future<CompanyList> fetchCompanyByUser(String token) async {
-  final response = await http.post(
-      'https://sbwebapidev.azurewebsites.net/api/usuario/rolecompany',
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-        HttpHeaders.userAgentHeader: 'insomnia/6.6.2'
-      });
-
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    await FlutterSecureStorage()
-        .write(key: 'companyListById', value: response.body);
-    return CompanyList.fromJson(json.decode(response.body));
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load post');
-  }
-}
 
 class SelectCompanyScreen extends StatefulWidget {
   @override
@@ -33,10 +14,11 @@ class SelectCompanyScreen extends StatefulWidget {
 }
 
 class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
-  Future<CompanyList> companies;
+  Future<FetchedData<CompanyList>> companies;
 
   void _setCompany(Map<String, dynamic> company) async {
-    await FlutterSecureStorage().write(key: 'currentCompany', value: json.encode(company));
+    await FlutterSecureStorage()
+        .write(key: 'currentCompany', value: json.encode(company));
     Navigator.of(context).pushReplacementNamed('/home');
     // Navigator.of(context).push(
     //     MaterialPageRoute(builder: (context) => HomeScreen()));
@@ -52,7 +34,7 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
             return Center(
 //          Text(snapshot.data.data[index.toInt()]['data'].toString())
               child: GestureDetector(
-                onTap: (){
+                onTap: () {
                   _setCompany(snapshot.data.data[index.toInt()]);
                 },
                 child: Card(
@@ -71,25 +53,35 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
                               Text(
                                 'ID: ${snapshot.data.data[index.toInt()]['id']}',
                                 style: TextStyle(
-                                    fontSize: 16.0, fontWeight: FontWeight.bold),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              Padding(padding: EdgeInsets.only(bottom: 5.0),),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
                               Text(
                                 'Razão Social: ${snapshot.data.data[index.toInt()]['razaoSocial']}',
                                 style: TextStyle(
-                                    fontSize: 14.0, fontWeight: FontWeight.bold),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              Padding(padding: EdgeInsets.only(bottom: 5.0),),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
                               Text(
                                 'Nome Fantasia: ${snapshot.data.data[index.toInt()]['fantasia']}',
                                 style: TextStyle(
-                                    fontSize: 14.0, fontWeight: FontWeight.bold),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              Padding(padding: EdgeInsets.only(bottom: 5.0),),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
                               Text(
                                 'UF: ${snapshot.data.data[index.toInt()]['sigla']}',
                                 style: TextStyle(
-                                    fontSize: 14.0, fontWeight: FontWeight.bold),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -120,7 +112,7 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
 //            ], begin: Alignment.topLeft, end: Alignment.bottomRight),
         color: Colors.grey[100],
       ),
-      child: FutureBuilder<CompanyList>(
+      child: FutureBuilder<FetchedData<CompanyList>>(
         future: companies,
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -136,7 +128,21 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
                     title: Text('Selecione a empresa'),
                     centerTitle: true,
                   ),
-                  body: _companyList(context, snapshot),
+                  body: snapshot.data.error == true
+                      ? Center(
+                          child: Container(
+                            padding: EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SvgPicture.asset('assets/icons/empty.svg'),
+                                Text('Sem dados...', style: Theme.of(context).textTheme.subhead,)
+                              ],
+                            ),
+                          ),
+                        )
+                      : _companyList(context, snapshot.data),
                 );
           }
         },
@@ -147,11 +153,11 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
   @override
   void initState() {
     super.initState();
-    var auth;
-      FlutterSecureStorage().read(key: 'auth').then((result) {
-        auth = json.decode(result);
-        companies = fetchCompanyByUser(auth['token']);
-        setState(() {});
-    });
+    companies = fetchCompanyByUser();
+    // setState(() {});
+    // var auth;
+    // FlutterSecureStorage().read(key: 'auth').then((result) {
+    //   auth = json.decode(result);
+    // });
   }
 }

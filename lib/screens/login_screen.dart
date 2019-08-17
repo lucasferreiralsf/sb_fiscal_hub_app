@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sb_fiscal_hub_app/models/user_model.dart';
-import 'package:sb_fiscal_hub_app/screens/home_screen.dart';
-import 'package:sb_fiscal_hub_app/screens/select_company_screen.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:sb_fiscal_hub_app/repository/auth_repository.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -11,38 +8,51 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _grupoController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passController = TextEditingController();
+  final _grupoController = TextEditingController(text: 'grupo1');
+  final _emailController = TextEditingController(text: 'master@subway.com');
+  final _passController = TextEditingController(text: 'Subw@y12');
   final FocusNode _grupoFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passFocus = FocusNode();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isLoading = false;
 
-  void _login(model) {
-      Map<String, dynamic> userData = {
-        "grupo": _grupoController.text,
-        "email": _emailController.text,
-        "password": _passController.text,
-      };
-      model.loggout();
-      model.signIn(userData: userData, onSuccess: _onSuccess, onFail: _onFail);
-    }
+  void _login() {
+    setState(() {
+      _isLoading = true;
+    });
+    Map<String, dynamic> userData = {
+      "grupo": _grupoController.text,
+      "email": _emailController.text,
+      "password": _passController.text,
+    };
+    loggout();
+    signIn(userData: userData).then((result) {
+      if (result['loggedIn'] == true) {
+        _onSuccess();
+      } else {
+        _onFail(result['message']);
+      }
+    });
+  }
 
-    void _onSuccess() {
-      Navigator.pushNamed(context, '/select-company');
-    }
+  void _onSuccess() {
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.pushNamed(context, '/select-company');
+  }
 
-    void _onFail() {
-      // ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text('Chave, email ou senha incorretos.'),
-          backgroundColor: Theme.of(context).errorColor,
-          duration: Duration(seconds: 4),
-        ));
-      //   return null;
-      // });
-    }
+  void _onFail(String content) {
+    setState(() {
+      _isLoading = false;
+    });
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text(content),
+      backgroundColor: Theme.of(context).errorColor,
+      duration: Duration(seconds: 4),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,18 +60,15 @@ class _LoginScreenState extends State<LoginScreen> {
         BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
       currentFocus.unfocus();
       FocusScope.of(context).requestFocus(nextFocus);
-    }    
+    }
 
     return Scaffold(
       key: _scaffoldKey,
-      body: ScopedModelDescendant<UserModel>(
-        builder: (context, child, model) {
-          if (model.isLoading) {
-            return Center(
+      body: _isLoading == true
+          ? Center(
               child: CircularProgressIndicator(),
-            );
-          } else {
-            return Container(
+            )
+          : Container(
               decoration: BoxDecoration(
 //          gradient: LinearGradient(
 //            colors: [
@@ -219,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             focusNode: _passFocus,
                             onFieldSubmitted: (term) {
                               _passFocus.unfocus();
-                              _login(model);
+                              _login();
                             },
                           ),
                           Padding(
@@ -255,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             onPressed: () {
                               if (_formKey.currentState.validate()) {
-                                _login(model);
+                                _login();
                               }
                             },
                           ),
@@ -268,10 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }

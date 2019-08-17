@@ -14,7 +14,7 @@ description: Subway Brazil Fiscal Hub App
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -28,7 +28,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   http: ^0.12.0+2
   intl: ^0.15.8
-  scoped_model: ^1.0.1
+  flutter_svg: ^0.14.0
   string_mask: ^0.1.0
   flutter_secure_storage: ^3.2.1+1
 
@@ -56,6 +56,7 @@ flutter:
   assets:
     - assets/logo/mini-subway-branco@2x.png
     - assets/logo/mini-subway@2x.png
+    - assets/icons/empty.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
