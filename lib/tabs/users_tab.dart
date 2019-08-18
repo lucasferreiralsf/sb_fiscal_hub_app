@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,9 @@ class UsersTab extends StatefulWidget {
 
 class _UsersTabState extends State<UsersTab> {
   Future<FetchedData<UserModel>> users;
+  bool _isLoading = false;
+  final AsyncMemoizer<FetchedData<UserModel>> _memoizer =
+      AsyncMemoizer<FetchedData<UserModel>>();
 
   final _titleStyle = TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold);
   final _subTitleStyle = TextStyle(fontSize: 14.0);
@@ -73,16 +77,24 @@ class _UsersTabState extends State<UsersTab> {
                         child: Row(
                           children: <Widget>[
                             GestureDetector(
-                              onTap: () {},
-                              child: Icon(Icons.done),
+                              onLongPress: () {},
+                              onTap: () {
+                                _neverSatisfied(
+                                    context, snapshot.data.data[index.toInt()]);
+                              },
+                              child: Icon(snapshot.data.data[index.toInt()]
+                                          ['bloqueado'] ==
+                                      'N'
+                                  ? Icons.lock_open
+                                  : Icons.lock_outline),
                             ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 10.0),
-                            ),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Icon(Icons.delete),
-                            ),
+                            // Padding(
+                            //   padding: EdgeInsets.only(left: 10.0),
+                            // ),
+                            // GestureDetector(
+                            //   onTap: () {},
+                            //   child: Icon(Icons.delete),
+                            // ),
                           ],
                         ),
                       )
@@ -114,7 +126,11 @@ class _UsersTabState extends State<UsersTab> {
                   ),
                 );
               } else {
-                return _customList(context, snapshot.data);
+                if (_isLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return _customList(context, snapshot.data);
+                }
               }
           }
         },
@@ -125,10 +141,84 @@ class _UsersTabState extends State<UsersTab> {
   @override
   void initState() {
     super.initState();
-    users = fetchUsers();
+    users = _fetchUsers();
   }
 
   _resolveDate(data) {
     return DateFormat('dd-MM-yyyy').format(DateTime.parse(data));
+  }
+
+  _updateAndGetUsers({context, user, @required String action}) async {
+    setState(() {
+      _isLoading = true;
+    });
+    user['bloqueado'] = user['bloqueado'] == 'N' ? 'S' : 'N';
+    // var userModified = Map<String, dynamic>();
+    // userModified.addAll(user);
+    // userModified['bloqueado'] = !userModified['bloqueado'];
+    final result = await saveUser(user);/* .then((result) { */
+      setState(() {
+        _isLoading = false;
+      });
+      if (result.statusCode == 200) {
+        // Scaffold.of(context).showSnackBar(SnackBar(
+        //   content: Text(
+        //       'Usuário ${user['bloqueado'] ? 'bloqueado com sucesso.' : 'desbloqueado com sucesso.'}'),
+        //   backgroundColor: Theme.of(context).primaryColor,
+        //   duration: Duration(seconds: 4),
+        // ));
+        setState(() {
+          
+        users = _fetchUsers();
+        });
+      } else {
+        // Scaffold.of(context).showSnackBar(SnackBar(
+        //   content: Text(result.message),
+        //   backgroundColor: Theme.of(context).errorColor,
+        //   duration: Duration(seconds: 4),
+        // ));
+      }
+    // });
+  }
+
+  _fetchUsers() {
+    // return _memoizer.runOnce(() async {
+      return fetchUsers();
+    // });
+  }
+
+  Future<void> _neverSatisfied(context, user) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: user['bloqueado'] == 'N' ? Text('Bloquear Usuário') : Text('Desbloquear Usuário'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                user['bloqueado'] == 'N' ? Text('Tem certeza que deseja bloquear o(a) ${user['nome']}?') :
+                Text('Tem certeza que deseja desbloquear o(a) ${user['nome']}?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Confirmar'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _updateAndGetUsers(context: context, user: user, action: 'A');
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
